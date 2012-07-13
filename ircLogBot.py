@@ -7,26 +7,40 @@ from twisted.python import log
 import time, sys
 
 # custom imports
-from message import Message
+toLoad  = ["message"]
+modules = {}
 
 class SumDumBot(irc.IRCClient):
     nickname = "onedumbot"
-    
+
     def connectionMade(self):
+        for n in toLoad:
+            modules[n] = __import__(n)
         irc.IRCClient.connectionMade(self)
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
 
     def signedOn(self):
-        self.join(self.factory.channel)
+        for n in self.factory.channels:
+            self.join(n)
 
     def joined(self, channel):
 	return
 
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
-        message = Message(channel, msg, user, self)
+        if user=="jeefy" and msg==self.nickname+": reload":
+            self.msg(channel, "Reloading modules...")
+            for n in toLoad:
+                 reload(modules[n])
+            mesg = modules['message'].Message()
+            mesg.reloadPlugins()
+            self.msg(channel, "Reloading complete")
+        elif self.factory.channels.has_key(channel[1:]):
+            mesg = modules['message'].Message()
+            
+            mesg.process(channel, msg, user, self, self.factory.channels[channel[1:]])
 
     def action(self, user, channel, msg):
         user = user.split('!', 1)[0]
@@ -40,8 +54,11 @@ class SumDumBot(irc.IRCClient):
         return nickname + '_'
 
 class SumDumFactory(protocol.ClientFactory):
-    def __init__(self, channel):
-        self.channel = channel
+    def __init__(self):
+        self.channels = {
+            'otakushirts': False,
+            'onedumbot':   True,
+        }
 
     def buildProtocol(self, addr):
         p = SumDumBot()
@@ -59,7 +76,7 @@ class SumDumFactory(protocol.ClientFactory):
 
 if __name__ == '__main__':
     # create factory protocol and application
-    f = SumDumFactory(sys.argv[1])
+    f = SumDumFactory()
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
