@@ -4,11 +4,17 @@ from twisted.internet import reactor, protocol
 from twisted.python import log
 
 # system imports
-import time, sys
-
+import time, sys, re
+import simplejson
 # custom imports
 toLoad  = ["message"]
 modules = {}
+
+regex = {
+    'join'  : re.compile('\: join #?(\w+)', flags=re.IGNORECASE),
+    'leave' : re.compile('\: leave #?(\w+)', flags=re.IGNORECASE)
+}
+
 
 class SumDumBot(irc.IRCClient):
     nickname = "onedumbot"
@@ -37,6 +43,25 @@ class SumDumBot(irc.IRCClient):
             mesg = modules['message'].Message()
             mesg.reloadPlugins()
             self.msg(channel, "Reloading complete")
+
+        elif user=="jeefy" and regex['join'].search(msg):
+            newChan = msg.split(': ')[1].split(' ')
+            silent = False
+            if len(newChan) > 2 and newChan[2]=="true":
+                silent = True
+            self.factory.channels[newChan[1]] = silent
+            self.join(newChan[1])
+            f = open('channels.conf', 'a')
+            f.write(simplejson.dumps({'channel':newChan[1], 'silent': silent})) 
+
+        elif user=="jeefy" and regex['leave'].search(msg):
+            newChan = msg.split(': ')[1].split(' ')
+            silent = False
+            if len(newChan) > 2 and newChan[2]=="true":
+                silent = True
+            self.factory.channels[newChan[1]] = silent
+            self.leave(newChan[1])
+
         elif self.factory.channels.has_key(channel[1:]):
             mesg = modules['message'].Message()
             
@@ -55,10 +80,11 @@ class SumDumBot(irc.IRCClient):
 
 class SumDumFactory(protocol.ClientFactory):
     def __init__(self):
-        self.channels = {
-            'otakushirts': False,
-            'onedumbot':   True,
-        }
+        self.channels = {}
+        f = open('channels.conf')
+        for l in f.readlines():
+            tmp = simplejson.loads(l)
+            self.channels[tmp['channel']] = tmp['silent']
 
     def buildProtocol(self, addr):
         p = SumDumBot()

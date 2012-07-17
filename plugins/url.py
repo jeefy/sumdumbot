@@ -12,11 +12,16 @@ def match(msg):
         if info['Content-Type'].find('text/html') != -1:
             title   = BeautifulSoup(httpreq).title.string
             if title is not None:
-                toSend = '[ ' + BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip() + ' ]'
+                toSend =  BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip() 
             else:
-                toSend = "[ No Title Found ]"
+                toSend = "No Title Found"
         else:
-            toSend = "[ Binary Data or File ]"
+            toSend = "Binary Data or File"
 
         if msg.silent:
-            msg.irc.msg(msg.channel, toSend) 
+            msg.irc.msg(msg.channel, "[ " + toSend + " ]")
+        
+        args = {'title': toSend, 'user': msg.source, 'url': match, 'channel': msg.channel}
+        response = urllib.urlopen('http://otakushirts.com/link/add?' + urllib.urlencode(args))
+        if response.read() != "OK" and msg.silent:
+            msg.irc.msg(msg.channel, "Error adding link to archive!")

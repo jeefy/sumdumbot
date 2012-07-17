@@ -1,6 +1,6 @@
 import re
 
-toLoad  = ['hello', 'url']
+toLoad  = ['hello', 'url', 'weather']
 plugins = __import__('plugins', fromlist=toLoad)
 
 class Message:
