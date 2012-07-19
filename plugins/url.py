@@ -31,3 +31,22 @@ def match(msg):
 def htmlentitydecode(s):
     return re.sub('&(%s);' % '|'.join(name2codepoint), 
             lambda m: unichr(name2codepoint[m.group(1)]), s)
+
+def unescape(s):
+    s = s.replace("%20", " ")
+    s = s.replace("%21", "!")
+    s = s.replace("%22", "\"")
+    s = s.replace("%23", "#")
+    s = s.replace("%24", "$")
+    s = s.replace("%25", "%")
+    s = s.replace("%26", "&")
+    s = s.replace("%27", "\'")
+    s = s.replace("%28", "(")
+    s = s.replace("%29", ")")
+    s = s.replace("%2A", "*")
+    s = s.replace("%2B", "+")
+    s = s.replace("%2C", ",")
+    s = s.replace("%2D", "-")
+    s = s.replace("%2E", ".")
+    s = s.replace("%2F", "/")
+    return s
