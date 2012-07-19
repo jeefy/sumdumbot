@@ -1,5 +1,6 @@
 import re
 import urllib
+import htmlentitydefs
 from BeautifulSoup import BeautifulSoup
 
 urlMatch = re.compile('(https?\:\/\/[^\s]+)', flags=re.IGNORECASE)
@@ -12,7 +13,8 @@ def match(msg):
         if info['Content-Type'].find('text/html') != -1:
             title   = BeautifulSoup(httpreq).title.string
             if title is not None:
-                toSend =  BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip() 
+                toSend =  BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip()
+                
             else:
                 toSend = "No Title Found"
         else:
@@ -25,3 +27,4 @@ def match(msg):
         response = urllib.urlopen('http://otakushirts.com/link/add?' + urllib.urlencode(args))
         if response.read() != "OK" and msg.silent:
             msg.irc.msg(msg.channel, "Error adding link to archive!")
+
