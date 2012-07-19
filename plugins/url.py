@@ -4,6 +4,7 @@ import htmlentitydefs
 from BeautifulSoup import BeautifulSoup
 
 urlMatch = re.compile('(https?\:\/\/[^\s]+)', flags=re.IGNORECASE)
+s = u'1234567890-/:;()$&@".,?!\'[]{}#%^*+=_\|~<>\u20ac\xa3\xa5\u2022.,?!\''
 
 def match(msg):
     for match in urlMatch.findall(msg.msg):
