@@ -1,6 +1,7 @@
 import re
 import urllib
 import htmlentitydefs
+from htmlentitydefs import name2codepoint
 from BeautifulSoup import BeautifulSoup
 
 urlMatch = re.compile('(https?\:\/\/[^\s]+)', flags=re.IGNORECASE)
@@ -13,7 +14,7 @@ def match(msg):
         if info['Content-Type'].find('text/html') != -1:
             title   = BeautifulSoup(httpreq).title.string
             if title is not None:
-                toSend =  htmlentitydecode(BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip())
+                toSend =  decodeEntities(BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip())
                 
             else:
                 toSend = "No Title Found"
@@ -28,25 +29,22 @@ def match(msg):
         if response.read() != "OK" and msg.silent:
             msg.irc.msg(msg.channel, "Error adding link to archive!")
 
-def htmlentitydecode(s):
-    return re.sub('&(%s);' % '|'.join(name2codepoint), 
-            lambda m: unichr(name2codepoint[m.group(1)]), s)
+EntityPattern = re.compile('&(?:#(\d+)|(?:#x([\da-fA-F]+))|([a-zA-Z]+));')
+def decodeEntities(s, encoding='utf-8'):
+    def unescape(match):
+        code = match.group(1)
+        if code:
+            return unichr(int(code, 10))
+        else:
+            code = match.group(2)
+            if code:
+                return unichr(int(code, 16))
+            else:
+                code = match.group(3)
+                if code in name2codepoint:
+                    return unichr(name2codepoint[code])
+        return match.group(0)
 
-def unescape(s):
-    s = s.replace("%20", " ")
-    s = s.replace("%21", "!")
-    s = s.replace("%22", "\"")
-    s = s.replace("%23", "#")
-    s = s.replace("%24", "$")
-    s = s.replace("%25", "%")
-    s = s.replace("%26", "&")
-    s = s.replace("%27", "\'")
-    s = s.replace("%28", "(")
-    s = s.replace("%29", ")")
-    s = s.replace("%2A", "*")
-    s = s.replace("%2B", "+")
-    s = s.replace("%2C", ",")
-    s = s.replace("%2D", "-")
-    s = s.replace("%2E", ".")
-    s = s.replace("%2F", "/")
-    return s
+    if isinstance(s, str):
+        s = s.decode(encoding)
+    return EntityPattern.sub(unescape, s)
