@@ -4,6 +4,7 @@ import htmlentitydefs
 from BeautifulSoup import BeautifulSoup
 
 urlMatch = re.compile('(https?\:\/\/[^\s]+)', flags=re.IGNORECASE)
+s = u'1234567890-/:;()$&@".,?!\'[]{}#%^*+=_\|~<>\u20ac\xa3\xa5\u2022.,?!\''
 
 def match(msg):
     for match in urlMatch.findall(msg.msg):
@@ -14,6 +15,7 @@ def match(msg):
             title   = BeautifulSoup(httpreq).title.string
             if title is not None:
                 toSend =  BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip()
+                toSend =  toSend.unquote(toSend.quote(s.encode("utf8"))).decode("utf8")
                 
             else:
                 toSend = "No Title Found"
