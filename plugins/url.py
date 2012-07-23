@@ -12,7 +12,7 @@ def match(msg):
         httpreq = urllib.urlopen(match)
         info    =  httpreq.info()
         if info['Content-Type'].find('text/html') != -1:
-            title   = BeautifulSoup(httpreq).title.string
+            title   = BeautifulSoup(httpreq).html.head.title.string
             if title is not None:
                 toSend =  BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip()
                 toSend =  BeautifulStoneSoup(toSend,convertEntities=BeautifulStoneSoup.HTML_ENTITIES).contents[0]
