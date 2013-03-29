@@ -1,4 +1,5 @@
 import re
+import urllib2
 import urllib
 import htmlentitydefs
 from BeautifulSoup import BeautifulSoup
@@ -9,14 +10,21 @@ urlMatch = re.compile('(https?\:\/\/[^\s]+)', flags=re.IGNORECASE)
 def match(msg):
     for match in urlMatch.findall(msg.msg):
         toSend  = ""
-        httpreq = urllib.urlopen(match)
-        info    =  httpreq.info()
+        try:
+             httpreq = urllib2.urlopen(match)
+             info    =  httpreq.info()
+        except urllib2.HTTPError, x:
+             return False 
         if info['Content-Type'].find('text/html') != -1:
             htmlBody = BeautifulSoup(httpreq)
-            title   = htmlBody.html.head.title.string
+#            title   = htmlBody.html.head.title.string
+            try:
+                title = htmlBody.findAll('title')[0].text
+            except:
+                title = None
             if title is not None:
                 toSend =  BeautifulSoup(title).__str__('utf-8').replace('\r', '').replace('\n', '').strip()
-                toSend =  BeautifulStoneSoup(toSend,convertEntities=BeautifulStoneSoup.HTML_ENTITIES).contents[0]
+#                toSend =  BeautifulStoneSoup(toSend,convertEntities=BeautifulStoneSoup.HTML_ENTITIES).contents[0]
             else:
                 toSend = "No Title Found"
         else:

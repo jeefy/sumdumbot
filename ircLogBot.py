@@ -1,8 +1,8 @@
 # twisted imports
 from twisted.words.protocols import irc
-from twisted.internet import reactor, protocol
-from twisted.python import log
-
+from twisted.internet        import reactor, protocol
+from twisted.python          import log
+from twisted.internet        import task
 # system imports
 import time, sys, re
 import simplejson
@@ -111,9 +111,11 @@ class SumDumFactory(protocol.ClientFactory):
         self.channels = {}
         f = open('channels.conf')
         self.channels = simplejson.loads(f.read())
+        self.bot = None
 
     def buildProtocol(self, addr):
         p = SumDumBot()
+        self.bot = p
         p.factory = self
         return p
 
@@ -125,11 +127,21 @@ class SumDumFactory(protocol.ClientFactory):
         print "connection failed:", reason
         reactor.stop()
 
+    def checkMessages(self):
+        if hasattr(self, 'bot') and self.bot is not None:
+            f     = open("messages.txt", "r")
+            lines = f.readlines()
+            for line in lines:
+                self.bot.msg("#otakushirts", line)
+            f.close()
+            open("messages.txt", "w").close()
 
 if __name__ == '__main__':
     # create factory protocol and application
     f = SumDumFactory()
-
+    
+    m = task.LoopingCall(f.checkMessages)
+    m.start(5.0)
     # connect factory to this host and port
     reactor.connectTCP(config['irc']['server'], config['irc']['port'], f)
 
