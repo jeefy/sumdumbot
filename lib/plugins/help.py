@@ -3,8 +3,12 @@ def match(msg):
         msg.irc.msg(msg.source, "Hello friend! I'm capable of the following commands and functions: ")
         msg.irc.msg(msg.source, "!w ZIPCODE for current weather (ex !w 48103) ")
         msg.irc.msg(msg.source, "!wd ZIPCODE for current and future weather (ex !wd 48103) ")
-        msg.irc.msg(msg.source, "!recipe SEARCH for a random top 20 recipe from allrecipes.com (ex !recipe mexican) ")
 
+        if msg.source in msg.config['admins']:
+            msg.irc.msg(msg.source, "-------- ")
+            msg.irc.msg(msg.source, "Admin functions (You Lucky Dog You):")
+            msg.irc.msg(msg.source, "!join, !leave, !mute, !unmute, !reload, !gitpull")
+            
         msg.irc.msg(msg.source, "-------- ")
         msg.irc.msg(msg.source, "Any link posted is archived and added to http://otakushirts.com ")
         msg.irc.msg(msg.source, "-------- ")
