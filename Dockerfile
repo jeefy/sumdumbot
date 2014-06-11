@@ -8,4 +8,4 @@ RUN git clone https://github.com/jeefy/sumdumbot.git /sumdumbot/
 
 ENV TEST 1
 
-CMD (cd /sumdumbot/ && git pull && python run.py)
+CMD (cd /sumdumbot/ && git pull && python /sumdumbot/app/run.py)
