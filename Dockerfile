@@ -2,10 +2,10 @@ FROM ubuntu:12.04
 
 RUN apt-get update
 RUN apt-get -y upgrade
-RUN apt-get -y install python python-twisted python-beautifulsoup 
+RUN apt-get -y install git python python-twisted python-beautifulsoup 
     
-ADD . /sumdumbot/
+RUN git clone https://github.com/jeefy/sumdumbot.git /sumdumbot/
 
 ENV TEST 1
 
-CMD ["python", "/sumdumbot/app/run.py"]
+CMD (cd /sumdumbot/ && git pull && python run.py)
