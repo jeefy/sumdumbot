@@ -1,4 +1,4 @@
-toLoad  = ['hello', 'url', 'weather', 'help']
+toLoad  = ['hello', 'url', 'weather', 'help', 'roll']
 plugins = __import__('lib.plugins', fromlist=toLoad)
 
 class Message:
